@@ -80,7 +80,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
 .screen.show{display:flex;flex-direction:column}
 
 /* packs screen: ring */
-#ring{position:relative;flex:1;min-height:260px;perspective:1400px;touch-action:pan-y;cursor:grab}
+#ring{position:relative;flex:1 1 0;min-height:140px;perspective:1400px;touch-action:pan-y;cursor:grab}
 #ring.drag{cursor:grabbing}
 .rp{position:absolute;left:50%;top:50%;will-change:transform;transform-style:preserve-3d}
 .rp img{display:block;height:var(--ph);width:auto;pointer-events:none;-webkit-user-drag:none;
@@ -400,6 +400,25 @@ button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
   .pulls .card.face,.pulls .card.face.wide,.pulls .card.face.tall,.pulls .card.face.slim{height:clamp(90px,34dvh,150px)}
   .toast{bottom:auto;top:8px;width:min(70vw,440px);transform:translate(-50%,-30px)}
   .toast.show{transform:translate(-50%,0)}
+}
+
+/* shorter windows (laptops): keep every button above the bottom menu */
+@media (min-width:761px) and (max-height:760px){
+  .top{padding-top:8px;padding-bottom:6px}
+  .sub{padding-top:4px}
+  #pDesc{display:none}
+  .info{padding-top:0}.info h2{font-size:26px}
+  .dots{margin-top:2px}
+  .controls{padding:8px 16px 10px}
+  .btn-big{padding:11px 30px}
+  .btn-s{padding:9px 14px}
+  .odds-row{padding-bottom:2px}
+  .nav{padding-top:7px;padding-bottom:7px}
+}
+@media (min-width:761px) and (max-height:600px){
+  .sub{display:none}
+  .info .found{display:none}
+  .odds-row{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
