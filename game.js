@@ -183,7 +183,7 @@ function hud(){
   $('#pityTxt').textContent = `Legendary within ${PITY - S.sinceLeg} pack${PITY-S.sinceLeg===1?'':'s'}`;
   const st = Object.values(S.stash).reduce((a,b)=>a+b,0);
   $('#stashTxt').textContent = `My Stash · ${st}`;
-  $('#soundBtn').textContent = S.sound ? '🔊 Sound: On' : '🔈 Sound: Off';
+  $('#soundBtn').innerHTML = S.sound ? '<span class="ni">🔊</span><span class="nl">Sound: On</span>' : '<span class="ni">🔈</span><span class="nl">Sound: Off</span>';
   packInfo();
 }
 function openLabel(pid){
