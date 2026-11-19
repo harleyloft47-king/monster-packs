@@ -78,7 +78,7 @@ function packOf(id){ return PACKS.find(p=>p.id===PACK_OF[id]); }
 
 function atlasStyle(m){ if(!m.atlas) return `background-image:url('${m.card}');background-size:cover;background-position:center`;
   const [s,x,y,w,h,W,H]=m.atlas;
-  return `background-image:url('${s}');background-size:${W/w*100}% ${H/h*100}%;background-position:${W>w?x/(W-w)*100:0}% ${H>h?y/(H-h)*100:0}%`; }
+  return `background-image:url('${s}?v=4');background-size:${W/w*100}% ${H/h*100}%;background-position:${W>w?x/(W-w)*100:0}% ${H>h?y/(H-h)*100:0}%`; }
 function cardEl(m, o={}){
   if(m.card){
     const d=document.createElement('div');
