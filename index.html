@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#101012">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Monster Packs">
+<title>Monster Packs</title>
+<link rel="preload" as="image" href="coin.webp">
+<link rel="preload" as="font" type="font/ttf" href="fonts/cinzel.ttf" crossorigin>
+<style>
+@font-face{font-family:'Cinzel';src:url('fonts/cinzel.ttf') format('truetype');font-weight:400 900;font-display:swap}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0d0d0f;color:#ece6dc;overflow:hidden;
+  font-family:"Segoe UI",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+:root{
+  --red:#b3202a; --red2:#e0313d; --silver1:#f2f3f5; --silver2:#8d939a;
+  --panel:linear-gradient(180deg,#2a2b30 0%,#18191d 100%);
+  --edge:#55595f; --glow:150,185,215;
+}
+.cz{font-family:'Cinzel',Georgia,serif}
+
+/* ---------- backdrop ---------- */
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 46%, rgba(var(--glow),.22), transparent 70%),
+    radial-gradient(ellipse at 50% 120%, #1b0b0d 0%, transparent 60%),
+    linear-gradient(180deg,#121215 0%,#0c0c0e 55%,#09090a 100%);
+  transition:background .6s}
+#bg::before{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 2px,transparent 2px 90px),
+             repeating-linear-gradient(0deg,rgba(255,255,255,.01) 0 2px,transparent 2px 60px)}
+.fog{position:absolute;left:-50%;width:200%;height:42%;bottom:-6%;opacity:.5;filter:blur(30px);
+  background:radial-gradient(ellipse at 30% 50%,rgba(170,170,185,.18),transparent 60%),
+             radial-gradient(ellipse at 70% 60%,rgba(140,140,155,.14),transparent 60%);
+  animation:fog 38s linear infinite}
+.fog.f2{bottom:auto;top:-10%;opacity:.25;animation-duration:60s;animation-direction:reverse}
+@keyframes fog{from{transform:translateX(0)}to{transform:translateX(25%)}}
+.ember{position:absolute;width:3px;height:3px;border-radius:50%;background:#ff5a3c;box-shadow:0 0 6px #ff3b20;opacity:0;animation:ember linear infinite}
+@keyframes ember{0%{opacity:0;transform:translateY(0)}10%{opacity:.8}100%{opacity:0;transform:translateY(-70vh) translateX(40px)}}
+
+/* ---------- app shell ---------- */
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;max-width:1400px;margin:0 auto}
+.top{display:flex;align-items:center;gap:14px;padding:12px 18px 10px;border-bottom:1px solid rgba(201,205,210,.18)}
+.logo{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(20px,3vw,32px);letter-spacing:.03em;line-height:1;white-space:nowrap;
+  background:linear-gradient(180deg,#ffffff 0%,#b9bec4 40%,#f4f5f6 52%,#6d737a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 #000)}
+.logo .claw{font-size:.6em;color:var(--red);-webkit-text-fill-color:var(--red);letter-spacing:-.15em;margin-left:.2em;filter:none}
+.top .mid{flex:1;display:flex;justify-content:center;gap:10px}
+.btn-o{font-family:'Cinzel',serif;font-weight:700;font-size:13px;letter-spacing:.04em;padding:8px 14px;border-radius:10px;
+  background:var(--panel);border:1px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 12px rgba(0,0,0,.5);transition:border-color .15s,box-shadow .15s}
+.btn-o:hover{border-color:#d8dbe0;box-shadow:0 0 12px rgba(224,49,61,.35)}
+.btn-o.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2),0 0 14px rgba(224,49,61,.45)}
+.wallet{text-align:right;line-height:1.15}
+.coins{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-family:'Cinzel',serif;font-weight:700;font-size:clamp(16px,2.2vw,24px);color:#f0f1f3}
+.coin{width:34px;height:34px;flex:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.7))}
+.coin-ic{width:18px;height:18px;vertical-align:-4px;margin-right:6px}
+.bundle .stack{height:48px;display:flex;justify-content:center;align-items:center}
+.cstack{display:inline-flex}
+.cstack img{width:44px;height:44px;margin-left:-26px;filter:drop-shadow(-2px 3px 4px rgba(0,0,0,.75))}
+.cstack img:first-child{margin-left:0}
+.free{font-size:13px;color:#a7a39b}
+.free b{color:#e9e5dd}
+
+.sub{display:flex;justify-content:flex-end;align-items:center;gap:14px;padding:8px 22px 0;font-size:14px;color:#c9c4ba}
+.pbar{width:200px;height:4px;border-radius:2px;background:rgba(255,255,255,.08);overflow:hidden}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--red),#ff8a8a);width:0;transition:width .5s}
+
+/* ---------- screens ---------- */
+.screen{flex:1;min-height:0;display:none;position:relative}
+.screen.show{display:flex;flex-direction:column}
+
+/* packs screen: ring */
+#ring{position:relative;flex:1;min-height:260px;perspective:1400px;touch-action:pan-y;cursor:grab}
+#ring.drag{cursor:grabbing}
+.rp{position:absolute;left:50%;top:50%;will-change:transform;transform-style:preserve-3d}
+.rp img{display:block;height:var(--ph);width:auto;pointer-events:none;-webkit-user-drag:none;
+  filter:drop-shadow(0 18px 24px rgba(0,0,0,.75))}
+.rp .shadow{position:absolute;left:8%;right:8%;bottom:calc(var(--ph) * -.07);height:calc(var(--ph) * .07);border-radius:50%;
+  background:radial-gradient(ellipse,rgba(0,0,0,.75),transparent 70%)}
+.rp.front img{animation:float 4s ease-in-out infinite;filter:drop-shadow(0 22px 30px rgba(0,0,0,.8)) drop-shadow(0 0 26px rgba(var(--glow),.35))}
+@keyframes float{50%{transform:translateY(-8px)}}
+.arrow{position:absolute;top:58%;width:52px;height:52px;border-radius:50%;z-index:200;display:grid;place-items:center;
+  background:rgba(15,15,18,.75);border:2px solid var(--red2);box-shadow:0 0 14px rgba(224,49,61,.4);font-size:24px;line-height:1;color:#f0f0f0}
+.arrow:hover{background:rgba(60,15,20,.85)}
+.arrow.l{left:calc(50% - min(31vw,330px))}.arrow.r{right:calc(50% - min(31vw,330px))}
+
+.info{text-align:center;padding:4px 16px 0}
+.info h2{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(22px,3.4vw,34px);letter-spacing:.03em;
+  background:linear-gradient(180deg,#fff,#aeb3b9);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #000)}
+.info p{color:#cfc9be;font-size:15px;margin-top:2px}
+.info .found{color:#a8a399;font-size:14px;margin-top:2px}
+.dots{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:6px;font-size:14px;color:#9fd29f;min-height:22px}
+.dots i{width:12px;height:18px;border-radius:3px;background:var(--red2);box-shadow:0 0 8px rgba(224,49,61,.6)}
+.dots i.off{background:#333;box-shadow:none}
+.dots span.wait{color:#a7a39b}
+
+.controls{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px 4px}
+.btn-s{display:flex;align-items:center;gap:8px;font-family:'Cinzel',serif;font-weight:700;font-size:14px;padding:11px 16px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 6px 16px rgba(0,0,0,.55)}
+.btn-s:hover:not(:disabled){border-color:var(--red2);box-shadow:0 0 12px rgba(224,49,61,.35)}
+.btn-s:disabled{opacity:.45;cursor:default}
+.btn-s .ic{font-size:18px}
+.btn-big{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(17px,2vw,22px);letter-spacing:.05em;padding:15px 36px;border-radius:14px;min-width:280px;
+  color:#fff;background:linear-gradient(180deg,#e5414c 0%,#b3202a 55%,#7d1219 100%);border:1px solid #ff8a92;
+  box-shadow:0 0 22px rgba(224,49,61,.45),inset 0 1px 0 rgba(255,255,255,.35),0 8px 20px rgba(0,0,0,.6);text-shadow:0 2px 0 rgba(0,0,0,.45);
+  transition:transform .08s,filter .15s}
+.btn-big:hover:not(:disabled){filter:brightness(1.1)}
+.btn-big:active:not(:disabled){transform:translateY(1px)}
+.btn-big:disabled{filter:grayscale(.8) brightness(.6);cursor:default}
+.btn-big small{display:block;font-size:.55em;font-weight:700;letter-spacing:.08em;opacity:.85}
+.link{color:#ff6a74;font-size:14px;text-decoration:underline;text-underline-offset:3px;padding:6px}
+.link:hover{color:#ff9aa1}
+.odds-row{text-align:center;padding-bottom:6px}
+
+/* nav */
+.nav{display:flex;justify-content:center;align-items:center;gap:12px;padding:10px 16px 12px;border-top:1px solid rgba(201,205,210,.12);background:rgba(10,10,12,.7);position:relative}
+.nav .note{position:absolute;left:18px;font-size:11px;color:#77736c;line-height:1.3;max-width:150px}
+.nav .ver{position:absolute;right:14px;bottom:6px;font-size:11px;color:#55524d}
+
+/* ---------- open screen ---------- */
+#open{align-items:center;justify-content:center}
+.ohint{position:absolute;top:14px;left:0;right:0;text-align:center;font-size:15px;color:#e6dfd3;text-shadow:0 1px 4px #000}
+.opack{position:relative;height:min(64vh,560px);aspect-ratio:var(--ar,0.433);touch-action:none;margin-top:10px}
+.opack .layer{position:absolute;inset:0;background-size:100% 100%;background-repeat:no-repeat}
+.opack .body{clip-path:polygon(0 var(--cut),100% var(--cut),100% 100%,0 100%);filter:drop-shadow(0 20px 30px rgba(0,0,0,.85)) drop-shadow(0 0 40px rgba(var(--glow),.35))}
+.opack .strip{clip-path:polygon(var(--p) 0,100% 0,100% var(--cut),var(--p) var(--cut))}
+.opack .torn{clip-path:polygon(0 0,var(--p) 0,var(--p) var(--cut),0 var(--cut));transform-origin:var(--p) var(--cut);transform:rotate(calc(var(--pn) * -22deg)) translateY(calc(var(--pn) * -14px))}
+.opack .tearline{position:absolute;left:0;right:0;top:var(--cut);height:2px;margin-top:-1px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 6px,transparent 6px 12px);opacity:.7;animation:pulse 1.2s infinite}
+.opack .swipe{position:absolute;top:calc(var(--cut) * .5);left:4%;font-size:12px;color:#fff;background:rgba(224,49,61,.85);padding:2px 8px;border-radius:10px;transform:translateY(-50%);pointer-events:none;animation:swipe 1.6s ease-in-out infinite}
+@keyframes swipe{0%{left:4%;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:72%;opacity:0}}
+@keyframes pulse{50%{opacity:.25}}
+.opack.flying .torn,.opack.flying .strip{transition:transform .7s ease-in,opacity .7s;transform:translate(60%,-160%) rotate(-40deg);opacity:0}
+.opack.drop .body{transition:transform .8s cubic-bezier(.5,0,.8,.4),opacity .8s;transform:translateY(110%);opacity:0}
+.obot{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:30px;font-size:15px}
+.obot button{color:#d9d3c8}.obot button:hover{color:#fff}
+.obot .tap{color:#ff6a74}
+
+/* card reveal */
+.reveal{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center}
+.reveal.show{display:flex}
+.rays{position:absolute;left:50%;top:46%;width:150vmax;height:150vmax;transform:translate(-50%,-50%);opacity:0;pointer-events:none;
+  background:repeating-conic-gradient(from 0deg,rgba(var(--ray),.55) 0 9deg,transparent 9deg 24deg);
+  -webkit-mask:radial-gradient(circle,#000 0 12%,transparent 55%);mask:radial-gradient(circle,#000 0 12%,transparent 55%);
+  animation:spin 22s linear infinite;transition:opacity .4s}
+.rays.on{opacity:1}
+@keyframes spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.cardslot{position:relative;width:min(300px,64vw,calc(52vh * .73));aspect-ratio:300/410;touch-action:none}
+.cardslot .card{position:absolute;inset:0;--s:1}
+.card.in{animation:cardin .55s cubic-bezier(.2,1.3,.4,1) both}
+.card.out{animation:cardout .35s ease-in forwards}
+@keyframes cardin{from{transform:translateY(40px) scale(.7) rotateY(90deg);opacity:0}to{transform:none;opacity:1}}
+@keyframes cardout{to{transform:translateX(-120%) rotate(-18deg);opacity:0}}
+.rcount{margin-top:18px;color:#cfc9be;font-size:15px;text-shadow:0 1px 3px #000}
+.skip{position:absolute;top:12px;right:16px;z-index:5}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:200}
+.flash.go{animation:flash .6s ease-out}
+@keyframes flash{0%{opacity:.85}100%{opacity:0}}
+
+/* summary */
+.summary{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:12px}
+.summary.show{display:flex}
+.summary h3{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(24px,3vw,34px);background:linear-gradient(180deg,#fff,#aeb3b9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.summary .sub2{color:#9fd29f;margin:4px 0 16px;font-size:15px}
+.pulls{display:flex;gap:clamp(6px,1.2vw,14px);flex-wrap:wrap;justify-content:center}
+.pulls .card{width:clamp(108px,15vw,170px);--s:.58;cursor:pointer;animation:cardin .45s both}
+.sumbtns{display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;justify-content:center}
+
+/* ---------- card ---------- */
+.card{aspect-ratio:5/7;border-radius:calc(14px * var(--s,1));padding:calc(5px * var(--s,1));position:relative;
+  background:linear-gradient(145deg,#f4f5f7,#8b9097 40%,#e6e8eb 55%,#6d7279);box-shadow:0 10px 26px rgba(0,0,0,.7)}
+.card.rare{background:linear-gradient(145deg,#fff3c4,#c99a2e 35%,#ffe28a 55%,#8d6416);box-shadow:0 0 22px rgba(255,190,60,.45),0 10px 26px rgba(0,0,0,.7)}
+.card.legendary{background:conic-gradient(from var(--a,0deg),#ff4d6d,#ffb84d,#fff35c,#5cff8a,#4dc3ff,#9b6bff,#ff4dd8,#ff4d6d);
+  box-shadow:0 0 28px rgba(255,120,220,.55),0 10px 26px rgba(0,0,0,.7);animation:rb 4s linear infinite}
+@property --a{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes rb{to{--a:360deg}}
+.card .in{position:relative;height:100%;border-radius:calc(10px * var(--s,1));background:#121214;overflow:hidden;display:flex;flex-direction:column;
+  border:1px solid rgba(0,0,0,.6)}
+.card .hd{display:flex;justify-content:space-between;align-items:center;padding:calc(6px * var(--s)) calc(9px * var(--s));
+  font-size:calc(12px * var(--s));font-weight:800;letter-spacing:.1em;color:#d9dce0;background:linear-gradient(180deg,#26272b,#18181b)}
+.card.rare .hd{color:#ffd97a}.card.legendary .hd{color:#ffb3f0}
+.card .art{position:relative;flex:1 1 auto;min-height:0;margin:0 calc(6px * var(--s));border-radius:calc(6px * var(--s));overflow:hidden;
+  background:#0b0b0d center/cover no-repeat;border:1px solid rgba(255,255,255,.12)}
+.card .art{container-type:size}
+.card .tile{position:absolute;left:50%;top:50%;width:max(100cqw,93.75cqh);aspect-ratio:300/320;transform:translate(-50%,-50%);background-size:1000% 1000%;background-repeat:no-repeat}
+.card .art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(10,10,12,.85)),radial-gradient(ellipse at 50% 40%,transparent 40%,rgba(0,0,0,.55))}
+.card .tag{position:absolute;left:calc(6px * var(--s));bottom:calc(6px * var(--s));z-index:2;font-size:calc(10px * var(--s));font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;padding:calc(2px * var(--s)) calc(7px * var(--s));border-radius:calc(8px * var(--s));background:rgba(0,0,0,.6);border:1px solid rgba(var(--pc),.8);color:rgb(var(--pc))}
+.card .new{position:absolute;left:calc(6px * var(--s));top:calc(6px * var(--s));z-index:2;font-size:calc(11px * var(--s));font-weight:900;letter-spacing:.06em;
+  padding:calc(2px * var(--s)) calc(8px * var(--s));border-radius:calc(8px * var(--s));background:var(--red2);color:#fff;box-shadow:0 0 8px rgba(224,49,61,.8)}
+.card .qty{position:absolute;right:calc(6px * var(--s));top:calc(6px * var(--s));z-index:2;font-size:calc(12px * var(--s));font-weight:800;
+  padding:calc(1px * var(--s)) calc(7px * var(--s));border-radius:calc(8px * var(--s));background:rgba(0,0,0,.7);color:#fff}
+.card .ft{padding:calc(7px * var(--s)) calc(8px * var(--s)) calc(8px * var(--s));text-align:center}
+.card .nm{font-family:'Cinzel',serif;font-weight:900;font-size:calc(17px * var(--s));line-height:1.12;color:#f4efe6}
+.card .or{font-size:calc(11.5px * var(--s));color:#b7b1a6;margin-top:calc(3px * var(--s));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .lr{font-size:calc(11.5px * var(--s));color:#8f8a81;margin-top:calc(4px * var(--s));line-height:1.3;font-style:italic}
+.card.mini .lr{display:none}
+.card.locked{background:linear-gradient(145deg,#3a3b40,#1e1f23);box-shadow:0 6px 14px rgba(0,0,0,.6);animation:none}
+.card.locked .art{filter:grayscale(1) brightness(.18) blur(2px)}
+.card.locked .nm{color:#55555b}
+.card.locked .hd{color:#66666c}
+
+/* ---------- inventory ---------- */
+#inv{padding:10px 18px 0}
+.invtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.invtop h2{font-family:'Cinzel',serif;font-size:26px;font-weight:700;flex:1;text-align:center;min-width:180px}
+.invstats{text-align:center;color:#c9c4ba;font-size:14px;margin-top:2px}
+.invstats small{display:block;color:#8a857d;font-size:12px}
+.pills{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.pills .lbl{color:#9b968d;font-size:13px;margin:0 2px 0 10px}
+.pill{font-size:13px;padding:6px 13px;border-radius:999px;background:var(--panel);border:1px solid var(--edge)}
+.pill.on{border-color:var(--red2);box-shadow:0 0 0 1px var(--red2),0 0 10px rgba(224,49,61,.4)}
+.grid{flex:1;min-height:0;overflow:auto;margin-top:12px;padding:4px 2px 18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px;align-content:start}
+.grid .card{--s:.5;cursor:pointer}
+.empty{grid-column:1/-1;text-align:center;color:#8d887f;padding:80px 0;font-size:18px}
+
+/* ---------- modals ---------- */
+.modal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(6,6,8,.72);backdrop-filter:blur(3px)}
+.modal.show{display:flex}
+.panel{width:min(520px,100%);max-height:88vh;overflow:auto;border-radius:16px;padding:20px 22px;background:var(--panel);border:1px solid var(--edge);
+  box-shadow:0 0 0 1px rgba(224,49,61,.35),0 0 28px rgba(224,49,61,.15),0 18px 48px rgba(0,0,0,.65);font-size:14px;line-height:1.5;color:#ddd6ca}
+.panel h3{font-family:'Cinzel',serif;font-size:20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:#fff}
+.x{width:32px;height:32px;border-radius:50%;border:1px solid var(--edge);background:#2b2c31;font-size:18px}
+.x:hover{border-color:var(--red2)}
+.panel table{width:100%;border-collapse:collapse;margin:12px 0}
+.panel td,.panel th{padding:5px 4px;text-align:right}
+.panel td:first-child,.panel th:first-child{text-align:left}
+.panel th{font-weight:600;color:#9b968d;font-size:12px}
+.c-c{color:#d5d8dc}.c-r{color:#ffd166}.c-l{color:#ff8ae6}
+.panel .sec{border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 12px;margin-top:10px;background:rgba(0,0,0,.18)}
+.panel .sec b{color:#fff;font-family:'Cinzel',serif}
+.panel ul{padding-left:18px}.panel li{margin:4px 0}
+.mbtns{display:flex;gap:10px;margin-top:14px}
+.mbtns button{flex:1;padding:11px;border-radius:12px;font-weight:700}
+.b-pri{background:linear-gradient(180deg,#e5414c,#a01b24);border:1px solid #ff8a92;color:#fff}
+.b-sec{background:var(--panel);border:1px solid var(--edge)}
+.big .card{width:min(320px,74vw);--s:1.05;margin:0 auto}
+.big .panel{background:none;border:none;box-shadow:none;text-align:center;width:auto}
+
+.card.face{aspect-ratio:300/410}
+.card.face.wide{aspect-ratio:420/300}
+.card.face.tall{aspect-ratio:240/812}
+.card.face.slim{aspect-ratio:240/475}
+.cardslot.slim{width:min(230px,52vw,calc(54vh * .505));aspect-ratio:240/475}
+.pulls .card.slim{width:clamp(80px,10vw,120px)}
+.grid .card.slim{justify-self:center;width:70%}
+.big .card.slim{width:min(240px,56vw,calc(64vh * .45))}
+.cardslot.tall{width:min(170px,40vw,calc(56vh * .2956));aspect-ratio:240/812}
+.pulls .card.tall{width:clamp(62px,7.5vw,92px)}
+.grid .card.tall{justify-self:center;width:46%}
+.big .card.tall{width:min(170px,40vw,calc(64vh * .2956))}
+.cardslot.wide{width:min(470px,88vw,calc(46vh * 1.4));aspect-ratio:420/300}
+.grid .card,.pulls .card{align-self:start}
+.pulls .card.wide{width:clamp(150px,21vw,236px)}
+.big .card.wide{width:min(470px,86vw)}
+.card.face .in{background:#000}
+.card.face .cimg{position:absolute;inset:0;display:block;pointer-events:none;background-repeat:no-repeat}
+.card.face .chips{position:absolute;top:calc(6px * var(--s));right:calc(6px * var(--s));display:flex;flex-direction:column;align-items:flex-end;gap:calc(4px * var(--s));z-index:2}
+.chip{font-size:calc(11px * var(--s));font-weight:800;letter-spacing:.06em;padding:calc(2px * var(--s)) calc(7px * var(--s));border-radius:calc(8px * var(--s));background:rgba(0,0,0,.75);color:#e3e5e8;border:1px solid rgba(255,255,255,.25)}
+.card.rare .chip{color:#ffd97a;border-color:rgba(255,200,90,.6)}
+.card.legendary .chip{color:#ffb3f0;border-color:rgba(255,140,230,.6)}
+.chip.new2{background:var(--red2);color:#fff;border-color:#ff8a92}
+.card.face.locked .cimg{filter:grayscale(1) brightness(.12) blur(7px)}
+.card.face.locked{background:linear-gradient(145deg,#3a3b40,#1e1f23)}
+.lockq{position:absolute;inset:0;display:grid;place-items:center;font-family:'Cinzel',serif;font-weight:900;font-size:calc(34px * var(--s));color:#55555b}
+.rlore{max-width:min(420px,86vw);text-align:center;margin-top:14px;color:#e6dfd3;font-style:italic;font-size:15px;line-height:1.4;text-shadow:0 1px 4px #000;min-height:2.8em}
+.lorebox{max-width:340px;margin:14px auto 0;text-align:center;color:#ddd6ca}
+.lorebox b{display:block;font-family:'Cinzel',serif;font-size:20px;color:#fff}
+.lorebox span{display:block;font-size:12px;color:#9b968d;margin-top:2px}
+.lorebox p{margin-top:8px;font-size:14px;line-height:1.45;font-style:italic}
+.getcoins{display:inline-block;margin:3px 0 2px;font-size:12px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:999px;color:#ece6dc;background:var(--panel);border:1px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 4px 12px rgba(0,0,0,.5)}
+.getcoins:hover{border-color:var(--red2);box-shadow:0 0 12px rgba(224,49,61,.35)}
+.testband{font-size:13px;padding:9px 12px;border-radius:10px;background:rgba(80,180,255,.1);border:1px dashed #5fb4ff;color:#cfe8ff;margin-bottom:12px}
+.testband b{color:#fff;font-family:inherit}
+.bundles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.bundle{position:relative;text-align:center;padding:16px 10px 12px;border-radius:12px;background:linear-gradient(180deg,#2c2d33,#1a1b1f);border:1px solid var(--edge);transition:border-color .15s,box-shadow .15s}
+.bundle:hover{border-color:#d8dbe0}
+.bundle .stack{font-size:28px;line-height:1}
+.bundle .amt{font-family:'Cinzel',serif;font-weight:900;font-size:22px;color:#fff;margin-top:6px}
+.bundle .bonus{font-size:12px;color:#9fd29f;min-height:16px}
+.bundle .nm{font-size:12px;color:#a7a39b;margin-top:2px}
+.bundle .price{margin-top:10px;width:100%;padding:9px;border-radius:10px;font-weight:800;color:#ece6dc;background:var(--panel);border:1px solid var(--edge);box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.bundle .price:hover{border-color:var(--red2);box-shadow:0 0 12px rgba(224,49,61,.35)}
+.bundle .ribbon{position:absolute;top:-9px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;letter-spacing:.08em;padding:2px 9px;border-radius:999px;background:var(--red2);color:#fff;white-space:nowrap}
+.shopnote{font-size:12px;color:#8a857d;margin-top:12px;text-align:center}
+/* toast */
+.toast{position:fixed;left:50%;bottom:90px;transform:translate(-50%,30px);opacity:0;z-index:400;pointer-events:none;
+  display:flex;gap:12px;align-items:center;padding:12px 18px;border-radius:12px;background:#1d1e22;border:1px solid #ffcf4d;box-shadow:0 0 22px rgba(255,190,60,.35);transition:all .35s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast .ti{font-size:26px}.toast b{display:block;color:#ffe08a}.toast span{font-size:13px;color:#cfc9be}
+
+#loading{position:fixed;inset:0;z-index:1000;background:#0b0b0d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .6s}
+#loading.done{opacity:0;pointer-events:none}
+#loading .row{display:flex;gap:10px}
+#loading img{height:min(34vh,220px)}
+#loading .t{font-family:'Cinzel',serif;color:#d4d7db;letter-spacing:.12em}
+
+@media (max-width:760px){
+  .top{flex-wrap:wrap;gap:8px;padding:10px 12px 8px}
+  .top .mid{order:3;flex-basis:100%}
+  .sub{justify-content:center;padding-top:6px;font-size:12px;white-space:nowrap}.sub .pbar{display:none}
+  .arrow{width:42px;height:42px;font-size:20px}.arrow.l{left:8px}.arrow.r{right:8px}
+  .btn-big{min-width:0;width:100%;order:-1}
+  .controls{gap:8px}
+  .nav{gap:6px}.nav .note,.nav .ver{display:none}
+  .btn-o{font-size:12px;padding:7px 10px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}.grid .card{--s:.42}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="bg"><div class="fog"></div><div class="fog f2"></div></div>
+
+<div id="loading">
+  <div class="row" id="loadPacks"></div>
+  <div class="t">Opening the crypt…</div>
+</div>
+
+<div id="app">
+  <header class="top">
+    <div class="logo">Monster Packs<span class="claw">///</span></div>
+    <div class="mid">
+      <button class="btn-o" data-modal="how">How to play</button>
+      <button class="btn-o" data-modal="badges">Badges</button>
+      <button class="btn-o shopbtn" data-shop><img class="coin-ic" src="coin.webp" alt="">Coin Shop</button>
+    </div>
+    <div class="wallet">
+      <div class="coins"><img class="coin" src="coin.webp" alt="" draggable="false">Coins: <span id="coinN">0</span></div>
+      <button class="getcoins" id="shopBtn">＋ Get coins</button>
+      <div class="free" id="freeTxt">Free packs ready: <b>0</b></div>
+    </div>
+  </header>
+  <div class="sub"><span id="colTxt">Collected 0</span><span>·</span><span id="pityTxt">Legendary within 30 packs</span><div class="pbar"><i id="colBar"></i></div></div>
+
+  <!-- PACKS -->
+  <section class="screen show" id="packs">
+    <div id="ring">
+      <button class="arrow l" id="prev" aria-label="Previous pack">‹</button>
+      <button class="arrow r" id="next" aria-label="Next pack">›</button>
+    </div>
+    <div class="info">
+      <h2 id="pName">—</h2>
+      <p id="pDesc"></p>
+      <div class="found" id="pFound"></div>
+      <div class="dots" id="dots"></div>
+    </div>
+    <div class="controls">
+      <button class="btn-s" id="stashBtn"><span class="ic">⚰</span><span id="stashTxt">My Stash · 0</span></button>
+      <button class="btn-s" id="buyBtn"><span class="ic">＋</span>Buy pack · 1,000</button>
+      <button class="btn-big" id="openBtn">OPEN FREE PACK</button>
+    </div>
+    <div class="odds-row"><button class="link" data-modal="odds">Pack odds</button></div>
+  </section>
+
+  <!-- OPEN -->
+  <section class="screen" id="open">
+    <div class="ohint" id="ohint">Tear across the top of the pack to open it</div>
+    <div class="opack" id="opack">
+      <div class="layer body"></div>
+      <div class="layer strip"></div>
+      <div class="layer torn"></div>
+      <div class="tearline"></div>
+      <div class="swipe">swipe →</div>
+    </div>
+    <div class="obot" id="obot"><button id="backBtn">Skip to cards ›</button><button class="tap" id="tapBtn">Tap to open</button></div>
+
+    <div class="reveal" id="reveal">
+      <button class="btn-s skip" id="skipBtn">Skip ›</button>
+      <div class="rays" id="rays"></div>
+      <div class="cardslot" id="slot"></div>
+      <div class="rlore" id="rlore"></div>
+      <div class="rcount" id="rcount"></div>
+    </div>
+
+    <div class="summary" id="summary">
+      <h3>Your pulls</h3>
+      <div class="sub2" id="sumTxt"></div>
+      <div class="pulls" id="pulls"></div>
+      <div class="sumbtns">
+        <button class="btn-big" id="againBtn" style="min-width:0;padding:12px 26px;font-size:16px">Open another</button>
+        <button class="btn-s" id="seeColl">See my collection</button>
+        <button class="btn-s" id="toPacks">Back to packs</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- INVENTORY -->
+  <section class="screen" id="inv">
+    <div class="invtop">
+      <div class="pills" style="margin:0"><button class="pill on" data-view="mine">My collection</button><button class="pill" data-view="catalog">Catalog</button></div>
+      <h2>Inventory</h2>
+      <button class="btn-s" id="sellBtn">Sell duplicates</button>
+    </div>
+    <div class="invstats" id="invStats"></div>
+    <div class="pills" id="fRarity"></div>
+    <div class="pills" id="fPack"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <nav class="nav">
+    <div class="note">Just for fun · coins have no real-world value</div>
+    <button class="btn-o" id="soundBtn">🔊 Sound: On</button>
+    <button class="btn-o shopbtn" data-shop><img class="coin-ic" src="coin.webp" alt="">Coin Shop</button>
+    <button class="btn-o on" data-go="packs">🂠 Packs</button>
+    <button class="btn-o" data-go="inv">⚰ Inventory</button>
+    <div class="ver">v3.0</div>
+  </nav>
+</div>
+
+<div class="flash" id="flash"></div>
+<div class="toast" id="toast"><div class="ti">🏅</div><div><b id="toastT"></b><span id="toastS"></span></div></div>
+
+<div class="modal" id="m-how"><div class="panel">
+  <h3>How to play <button class="x" data-close>×</button></h3>
+  <p>Rip open packs of monsters from the world's myths and legends, and collect them all.</p>
+  <div class="sec"><b>Open Monster Packs</b><ul>
+    <li>Five packs: Man-Eaters, Witches, Ghouls, Cursed Beasts and Spirits. Drag the ring (or use the arrows) to spin a pack to the front.</li>
+    <li>Every pack holds 5 cards. Tap Open, then drag your finger across the top of the pack to tear it. The strip peels as far as you tear.</li>
+    <li>Tap or swipe to flip through your cards one at a time. The last card is always Rare or better.</li>
+    <li>Three rarities: Common ◆ (silver), Rare ◆◆ (gold) and Legendary ◆◆◆ (rainbow).</li>
+    <li>Legendaries are the rarest of all, but you're guaranteed at least one every 30 packs.</li>
+    <li>Very rarely you'll open a Blood Moon Pack: every card Rare or better, with at least one Legendary.</li>
+  </ul></div>
+  <div class="sec"><b>Free packs &amp; coins</b><ul>
+    <li>You get a free pack every 12 hours, and up to 2 can wait for you.</li>
+    <li>Extra packs cost 1,000 coins. Buy them into My Stash and open them whenever you like.</li>
+    <li>Earn coins from badges and by selling duplicates: Common 25, Rare 150, Legendary 1,500.</li>
+    <li>Need more? Tap <b>＋ Get coins</b> under your coin count. The shop is in test mode for now, so no real money is charged.</li>
+  </ul></div>
+  <div class="sec"><b>Saving</b><ul><li>Your collection is saved in this browser on this device.</li></ul></div>
+</div></div>
+
+<div class="modal" id="m-odds"><div class="panel">
+  <h3><span id="oddsTitle">Pack odds</span> <button class="x" data-close>×</button></h3>
+  <p>Every pack has 5 cards. Every pack type has the same odds and its own set of monsters. Within a rarity, every monster in the pack has the same chance.</p>
+  <table>
+    <tr><th></th><th class="c-c">Common</th><th class="c-r">Rare</th><th class="c-l">Legendary</th></tr>
+    <tr><td>Cards 1–4</td><td class="c-c">88%</td><td class="c-r">11.8%</td><td class="c-l">0.2%</td></tr>
+    <tr><td>Card 5</td><td class="c-c">—</td><td class="c-r">98.5%</td><td class="c-l">1.5%</td></tr>
+    <tr><td>At least one per pack</td><td class="c-c">100%</td><td class="c-r">99.1%</td><td class="c-l">2.3%</td></tr>
+  </table>
+  <p>Guarantee: if 29 packs in a row have no Legendary, the next pack's last card is a Legendary, one you don't have yet if that pack still has any. Blood Moon Pack: about 1 in 2,000 packs, every card is Rare or better, with at least one Legendary.</p>
+  <div class="mbtns"><button class="b-pri" data-close>Got it</button></div>
+</div></div>
+
+<div class="modal" id="m-shop"><div class="panel" style="width:min(620px,100%)">
+  <h3>Coin Shop <button class="x" data-close>×</button></h3>
+  <div class="testband">🧪 <b>TEST MODE</b> · No real money is charged. Purchases add coins right away so you can try the shop.</div>
+  <div class="bundles" id="bundles"></div>
+  <p class="shopnote" id="shopNote"></p>
+</div></div>
+
+<div class="modal" id="m-badges"><div class="panel">
+  <h3>Badges <button class="x" data-close>×</button></h3>
+  <div id="badgeList"></div>
+</div></div>
+
+<div class="modal" id="m-confirm"><div class="panel">
+  <h3 id="cfT">Confirm</h3>
+  <p id="cfB"></p>
+  <div class="mbtns"><button class="b-sec" data-close>Cancel</button><button class="b-pri" id="cfOk">OK</button></div>
+</div></div>
+
+<div class="modal big" id="m-card"><div class="panel">
+  <div id="bigCard"></div>
+  <div class="mbtns" style="max-width:320px;margin:16px auto 0"><button class="b-sec" data-close>Close</button></div>
+</div></div>
+
+<script src="game.js"></script>
+</body>
+</html>
